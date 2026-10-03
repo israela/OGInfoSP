@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import os
+from pathlib import Path
 import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Simulation Results Viewer", layout="wide")
@@ -83,11 +84,23 @@ st.markdown("""<style>
 
 # --- Helper functions ---
 
-RESULTS_ROOT = 'output/July_2026'
+REPO_ROOT = Path(__file__).resolve().parent.parent
+RESULTS_CANDIDATES = (
+    REPO_ROOT / 'simulation-results-July-2026' / 'July_2026',
+    REPO_ROOT / 'output' / 'July_2026',
+)
+RESULTS_ROOT = next((path for path in RESULTS_CANDIDATES if path.is_dir()), RESULTS_CANDIDATES[0])
+
+if not RESULTS_ROOT.is_dir():
+    st.error(
+        'Simulation results not found. Extract simulation-results-July-2026.zip '
+        'in the repository root folder, then restart the viewer.'
+    )
+    st.stop()
 
 DATASET_FOLDER_PREFIXES = {
-    'Gaussian (K=4)': 'gaussian_K4',
-    'Gaussian (K=10)': 'gaussian_K10',
+    'Gaussian (4 classes)': 'gaussian_K4',
+    'Gaussian (10 classes)': 'gaussian_K10',
     'CIFAR (3 classes)': 'CIFAR_BCD',
     'CIFAR (10 classes)': 'CIFAR_all10',
 }
@@ -212,7 +225,7 @@ METRICS = ['FCR', 'Power', 'Selected', 'Correct Selected']
 
 st.sidebar.header("📊 Configuration")
 
-dataset_type = st.sidebar.radio("Dataset", ["Gaussian (K=4)", "Gaussian (K=10)", "CIFAR (3 classes)", "CIFAR (10 classes)"])
+dataset_type = st.sidebar.radio("Dataset", ["Gaussian (4 classes)", "Gaussian (10 classes)", "CIFAR (3 classes)", "CIFAR (10 classes)"])
 
 available_informative_types = {
     informative_type for informative_type in INFORMATIVE_TYPES
@@ -236,7 +249,7 @@ with st.sidebar.container(key='informative_type_options'):
 
 size = 500
 
-if dataset_type in ("Gaussian (K=4)", "Gaussian (K=10)"):
+if dataset_type in ("Gaussian (4 classes)", "Gaussian (10 classes)"):
     subfolder = st.sidebar.selectbox("Train/Test Distribution", [
         'trained_even_test_even',
         'trained_uneven_test_even',
@@ -245,7 +258,7 @@ if dataset_type in ("Gaussian (K=4)", "Gaussian (K=10)"):
     ])
     alpha = 0.05
     iterations = 10000
-    K = 4 if dataset_type == "Gaussian (K=4)" else 10
+    K = 4 if dataset_type == "Gaussian (4 classes)" else 10
     folder_base = f'{RESULTS_ROOT}/gaussian_K{K}_{informative_type}_{subfolder}'
     n_calibration = size
     n_vector_scaling = 100
@@ -276,7 +289,7 @@ st.sidebar.markdown('<hr class="sidebar-divider">', unsafe_allow_html=True)
 st.sidebar.markdown('<div class="methods-heading">Methods & Vector Scaling</div>', unsafe_allow_html=True)
 
 # Method selection
-dataset_name = 'gaussian' if dataset_type in ("Gaussian (K=4)", "Gaussian (K=10)") else 'CIFAR10'
+dataset_name = 'gaussian' if dataset_type in ("Gaussian (4 classes)", "Gaussian (10 classes)") else 'CIFAR10'
 configuration = subfolder if dataset_name == 'gaussian' else evenness
 default_vs = 'only_bias' if dataset_name == 'gaussian' else 'full'
 method_options = {}
@@ -336,7 +349,7 @@ if not os.path.isdir(folder_base):
 
 metric_index = METRICS.index(metric)
 
-if dataset_type in ("Gaussian (K=4)", "Gaussian (K=10)"):
+if dataset_type in ("Gaussian (4 classes)", "Gaussian (10 classes)"):
     # Line plot
     fig, ax = plt.subplots(figsize=(10, 4.5))
     

@@ -18,13 +18,15 @@ cd OGInfoSP
 
 Alternatively, select **Code > Download ZIP** on GitHub, extract the downloaded ZIP, and open a terminal in the extracted repository folder.
 
-Then install the required packages:
+## Reproducing the results
+
+**NOTE:** Running the complete configuration can be computationally expensive, so the saved results are also provided in `simulation-results-July-2026.zip`. To explore the saved results without reproducing the experiments, skip this section and follow the [interactive results viewer](#interactive-results-viewer) instructions.
+
+To reproduce the experiments, install the required packages (the pinned requirements support Python 3.11 through 3.13 and were tested with Python 3.13):
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
-
-## Reproducing the results
 
 The experiment configurations used for the paper are defined at the bottom of `simulation/main.py`.
 
@@ -39,8 +41,6 @@ To generate the experiment figures, run:
 ```powershell
 python -m visualization.plot_July_2026_paper_figures
 ```
-
-Running the complete configuration can be computationally expensive, so the saved results are also provided in `simulation-results-July-2026.zip`.
 
 ## Interactive results viewer
 
